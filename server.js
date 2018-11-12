@@ -22,3 +22,31 @@ let multerStorage = multer.diskStorage({
 })
 
 let upload = multer({storage: multerStorage});
+
+
+app.post("/signup", function (req, res) {
+     let parsed = JSON.parse(req.body)
+    parsed.password = sha256(parsed.password)
+    parsed.items = [];
+    MongoClient.connect(url, {useNewUrlParser: true}, function(err, client) {
+        if (err) throw err;
+        let db = client.db("meals-db");
+        db.collection("users").findOne({username: parsed.username}, (err, result) => {
+            if (err) throw err;
+            if (result) {
+                  res.send(JSON.stringify(
+                 {success:false, msg: 'Username Already Exists'}
+             ))
+            client.close()
+            return
+        } else {
+            db.collection("users").insertOne(parsed, (err, result)=>{
+                if(err) throw err;
+                let sessionID=uuid();
+                
+
+            })
+        }
+    })
+})
+
