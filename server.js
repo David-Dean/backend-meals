@@ -12,6 +12,9 @@ const MongoClient = require('mongodb').MongoClient;
 const url = "mongodb://admin:password1@ds159993.mlab.com:59993/meals-db" ;
 const dbName = 'meals-db';
 
+// Our server Port
+const PORT = 4000;
+
 // Configure the express app with needed middleware
 app.use(bodyParser.raw({type: ['application/*', 'text/*']}));// avoid parsing 'multipart/mixed' content types, let multer deal with that
 app.use(cookieParser());
@@ -24,9 +27,9 @@ let multerStorage = multer.diskStorage({
 
 let upload = multer({storage: multerStorage});
 
-/*******************
- *  Endpoints below
- ******************/
+/***************************
+ *  Login/Signup Endpoints 
+ **************************/
 
  app.post('/signup', function(req, res){
     // Parse the request body
@@ -71,7 +74,7 @@ let upload = multer({storage: multerStorage});
                 let date = new Date();
                 date.setMinutes(date.getMinutes() + 30);// cookie expires in 30 min...
                 res.cookie("sessionId", parsed.sessionId, {expire:date.toUTCString(), httpOnly:true});// httpOnly so Javascript can't access and mess with it
-                res.cookie("host", parsed.host, {httpOnly: true});// We'll use this for auto login
+                res.cookie("userType", parsed.userType, {httpOnly: true});// We'll use this for auto login
 
                 db.collection('users').insertOne(parsed, function(err, result){
 
@@ -81,7 +84,7 @@ let upload = multer({storage: multerStorage});
 
                     res.send(JSON.stringify({
                         success: true,
-                        host: parsed.host
+                        userType: parsed.userType
                     }))
 
                     // All done, goodbye
@@ -153,7 +156,7 @@ let upload = multer({storage: multerStorage});
             let date = new Date();
             date.setMinutes(date.getMinutes() + 30);// cookie expires in 30 min...
             res.cookie("sessionId", sessionId, {expire:date.toUTCString(), httpOnly:true});// httpOnly so Javascript can't access and mess with it
-            res.cookie("host", userDoc.host, {httpOnly: true})
+            res.cookie("userType", userDoc.userType, {httpOnly: true})
 
             db.collection('users').updateOne({userName: userDoc.userName}, {$set: {sessionId: sessionId}}, function(err, result){
 
@@ -163,11 +166,11 @@ let upload = multer({storage: multerStorage});
             })
 
             // Ok all done successfully!
-            // The front end will need to know if this is a client or a host type of user
+            // The front end will need to know userType
             // (Thing we also managed to write to the cookie for later automatic login)
             res.send(JSON.stringify({
                 success: true,
-                host: userDoc.host
+                userType: userDoc.userType
             }))
 
             // All done, goodbye
@@ -215,7 +218,7 @@ let upload = multer({storage: multerStorage});
                 // This user has already logged in and the cookie is still valid: Hello friend!
                 res.send(JSON.stringify({
                     success: true,
-                    host: req.cookies.host
+                    userType: req.cookies.userType
                 }))
             }
 
@@ -224,3 +227,8 @@ let upload = multer({storage: multerStorage});
         })
     })
  })
+
+ /******************
+  * Server listen
+  ******************/
+ app.listen(PORT, function(){ console.log('Server listening on port ' + PORT)});
