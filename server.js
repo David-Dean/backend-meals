@@ -176,6 +176,7 @@ let upload = multer({storage: multerStorage});
     })
  })
 
+ // Assuming the frontend fetch request is made with 'credentials' option, the cookies are passed along the HTTP request by the browser
  app.get('/login', function(req, res){
 
     // Check that sessionId cookie is set on the request
