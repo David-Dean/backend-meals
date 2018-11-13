@@ -228,6 +228,49 @@ let upload = multer({storage: multerStorage});
     })
  })
 
+ /*********************
+  * Profile endpoints
+  *********************/
+ app.post('/setprofile', upload.single('file'), function(req, res){
+
+    // create the object with values to update the user document
+    let updateObj = {
+        bio: req.body.bio,
+        profilePicturePath: 'pictures/' + req.file.filename
+    }
+
+    // Connect to the db
+    MongoClient.connect(url, function(err, client){
+
+        if(err) throw err;
+
+        let db = client.db(dbName);
+
+        // Update the document that has the provided userName
+        db.collection('users').updateOne({userName: req.body.userName}, {$set: {updateObj}}, function(err, result){
+
+            if (err) throw err;
+
+            if (result.modifiedCount !== 1)// to be on the safe side
+            {
+                res.send(JSON.stringify({
+                    success: false,
+                    msg: 'Document update modified nothing...'
+                }))
+            }
+            else
+            {
+                res.send(JSON.stringify({
+                    success: true
+                }))
+            }
+
+            // All done, goodbye
+            client.close();
+        })
+    })
+ })
+
  /******************
   * Server listen
   ******************/
