@@ -109,8 +109,6 @@ let upload = multer({storage: multerStorage});
         let db = client.db(dbName);
 
         // Find the document with the provided userName
-        let userDoc;
-
         db.collection('users').findOne({userName: parsed.userName}, function(err, result){
 
             if (err) throw err;
@@ -127,55 +125,51 @@ let upload = multer({storage: multerStorage});
             }
             else
             {
-                // Record found. keep a reference.
-                userDoc = result; 
+                // Record found
+                // Does the password match our hashed and salted one?
+                if (!result.password === sha256(result.password + result.salt)) // no
+                {
+                    // Send failure response and close db connection.
+                    res.send(JSON.stringify({
+                        success: false,
+                        msg: 'Wrong password'
+                    }))
+
+                    client.close();
+                }
+                else // We have a document and password is correct
+                {
+                    // So our user has properly logged in.
+                    // Give him a sessionId (written to cookie and database collection)
+                    // Don't forget user type in the cookie
+                    // Then send success
+                    let sessionId = uuid();
+
+                    let date = new Date();
+                    date.setMinutes(date.getMinutes() + 30);// cookie expires in 30 min...
+                    res.cookie("sessionId", sessionId, {expire:date.toUTCString(), httpOnly:true});// httpOnly so Javascript can't access and mess with it
+                    res.cookie("userType", result.userType, {httpOnly: true})
+
+                    db.collection('users').updateOne({userName: result.userName}, {$set: {sessionId: sessionId}}, function(err, result){
+
+                        if (err) throw err;
+
+                        if (result.modifiedCount !== 1) throw new Error("post /login, failed to write sessionId to database");// Just to be on the safe side...
+                    })
+
+                    // Ok all done successfully!
+                    // The front end will need to know userType
+                    // (Thing we also managed to write to the cookie for later automatic login)
+                    res.send(JSON.stringify({
+                        success: true,
+                        userType: result.userType
+                    }))
+
+                    // All done, goodbye
+                    client.close();
+                } 
             }
         })
-
-        // We may have a document for the user.
-        // Does the password match our hashed and salted one?
-        if (!userDoc ||
-            !userDoc.password === sha256(parsed.password + userDoc.salt)) // no
-        {
-            // Send failure response and close db connection.
-            res.send(JSON.stringify({
-                success: false,
-                msg: 'Wrong password'
-            }))
-
-            client.close();
-        }
-        else // We have a document and password is correct
-        {
-            // So our user has properly logged in.
-            // Give him a sessionId (written to cookie and database collection)
-            // Don't forget user type in the cookie
-            // Then send success
-            let sessionId = uuid();
-
-            let date = new Date();
-            date.setMinutes(date.getMinutes() + 30);// cookie expires in 30 min...
-            res.cookie("sessionId", sessionId, {expire:date.toUTCString(), httpOnly:true});// httpOnly so Javascript can't access and mess with it
-            res.cookie("userType", userDoc.userType, {httpOnly: true})
-
-            db.collection('users').updateOne({userName: userDoc.userName}, {$set: {sessionId: sessionId}}, function(err, result){
-
-                if (err) throw err;
-
-                if (result.modifiedCount !== 1) throw new Error("post /login, failed to write sessionId to database");// Just to be on the safe side...
-            })
-
-            // Ok all done successfully!
-            // The front end will need to know userType
-            // (Thing we also managed to write to the cookie for later automatic login)
-            res.send(JSON.stringify({
-                success: true,
-                userType: userDoc.userType
-            }))
-
-            // All done, goodbye
-            client.close();
-        }
     })
  })
 
@@ -247,7 +241,7 @@ let upload = multer({storage: multerStorage});
         let db = client.db(dbName);
 
         // Update the document that has the provided userName
-        db.collection('users').updateOne({userName: req.body.userName}, {$set: {updateObj}}, function(err, result){
+        db.collection('users').updateOne({userName: req.body.userName}, {$set: {bio: updateObj.bio, profilePicturePath: updateObj.profilePicturePath}}, function(err, result){
 
             if (err) throw err;
 
