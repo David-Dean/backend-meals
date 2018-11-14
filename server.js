@@ -221,6 +221,18 @@ let upload = multer({storage: multerStorage});
     })
  })
 
+ app.get('/logout', function(req, res){
+
+    // Clear the 'sessionId' and 'userType' cookies
+    res.clearCookie('sessionId', {httpOnly: true});
+    res.clearCookie('userType', {httpOnly: true});
+
+    // and we're done
+    res.send(JSON.stringify({
+        success: true
+    }))
+ })
+
  /*********************
   * Profile endpoints
   *********************/
