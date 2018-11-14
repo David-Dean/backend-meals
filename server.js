@@ -221,6 +221,7 @@ let upload = multer({storage: multerStorage});
     })
  })
 
+ // We'll clear the cookies and the auto-login will stop working, the user still needs to be logged out on the frontend
  app.get('/logout', function(req, res){
 
     // Clear the 'sessionId' and 'userType' cookies
