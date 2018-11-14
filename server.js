@@ -177,14 +177,12 @@ let upload = multer({storage: multerStorage});
  app.get('/login', function(req, res){
 
     // Check that sessionId cookie is set on the request
-    // If not, send failure, close db connection and quit (don't care to go further)
+    // If not, send failure and quit (don't care to go further)
     if (!req.cookies.sessionId)
     {
         res.send(JSON.stringify({
             success: false
         }))
-
-        client.close();
 
         return;
     }
@@ -212,7 +210,8 @@ let upload = multer({storage: multerStorage});
                 // This user has already logged in and the cookie is still valid: Hello friend!
                 res.send(JSON.stringify({
                     success: true,
-                    userType: req.cookies.userType
+                    userType: req.cookies.userType,
+                    userName: result.userName
                 }))
             }
 
