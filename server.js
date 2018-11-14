@@ -263,7 +263,46 @@ let upload = multer({storage: multerStorage});
         })
     })
  })
+ //adding a meal's information 
+app.post('/addmeal', upload.single('image'), function(req, res){
+     
+    let meal ={
+        title:req.body.title,
+        description: req.body.description,
+        price: req.body.price,
+        image: 'pictures/'+ req.file.filename,
+        ingredients: req.body.ingredients,
+        allergens: req.body.allergens,
+        userName: req.body.userName
+        }
 
+    //connect to the database
+    MongoClient.connect(url, function(err, client){
+        
+        if (err) throw err;
+
+        let db = client.db(dbName);
+
+        //add the meal to the meal database
+        db.collection('meals').insertOne(meal, function(err, result){
+        
+            if (err) throw err;
+
+             console.log(req.body.title + " has been added to the Database");
+
+             res.send(JSON.stringify({
+                 success: true,
+                 msg: "Meal added to the Database"
+             }))
+
+             //disconnect from database
+             client.close();
+        })
+    })
+})
+ app.get('/getmealdescription', function(req, res){
+
+ } )
  /******************
   * Server listen
   ******************/
