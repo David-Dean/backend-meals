@@ -278,14 +278,18 @@ let upload = multer({storage: multerStorage});
  })
  //adding a meal's information 
 app.post('/addmeal', upload.single('image'), function(req, res){
-     
+  
+    //splitting the string of dietary restrictions into an array
+    let dietObject = req.body.diet.split(',');
+    let ingredientObject = req.body.ingredients.split(',');
+    
     let meal ={
         title:req.body.title,
         description: req.body.description,
         price: req.body.price,
         image: 'pictures/'+ req.file.filename,
-        ingredients: req.body.ingredients,
-        diet: req.body.diet,
+        ingredients: ingredientObject,
+        diet: dietObject,
         userName: req.body.userName
         }
 
@@ -346,8 +350,8 @@ app.post('/addmeal', upload.single('image'), function(req, res){
                     title: result.title,
                     description: result.description,
                     price: result.price,
-                    ingredients: result.ingredients,
-                    diet: result.diet,
+                    ingredients: result.ingredientsObject,
+                    diet: result.dietObject,
                     image: result.image,
                     userName: result.userName,
                     _id: result._id
