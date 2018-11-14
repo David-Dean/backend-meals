@@ -293,7 +293,7 @@ app.post('/addmeal', upload.single('image'), function(req, res){
              res.send(JSON.stringify({
                  success: true,
                  msg: "Meal added to the Database",
-                 mealId: result._id
+                 _id: result._id
              }))
 
              //disconnect from database
@@ -306,6 +306,8 @@ app.post('/addmeal', upload.single('image'), function(req, res){
 
     let parsed = JSON.parse(req);
     
+    var obj_id = BSON.ObjectID.createFromHexString(parsed._id)
+
     //connect to the db
     MongoClient.connect(url, function(err, result){
 
@@ -314,7 +316,7 @@ app.post('/addmeal', upload.single('image'), function(req, res){
         let db = client.db(dbName);
 
         //Search 'meals' collection in db for matching mealId
-        db.collection('meals').findOne({mealId = parsed.mealId}, function(err, result){
+        db.collection('meals').findOne({_id: obj_id}, function(err, result){
 
             if (err) throw err;
 
@@ -335,7 +337,7 @@ app.post('/addmeal', upload.single('image'), function(req, res){
                     diet: result.diet,
                     image: result.image,
                     userName: result.userName,
-                    mealId: result._Id
+                    _id: result._id
                 }))
             }
             client.close()
