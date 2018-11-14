@@ -285,7 +285,7 @@ app.post('/addmeal', upload.single('image'), function(req, res){
         price: req.body.price,
         image: 'pictures/'+ req.file.filename,
         ingredients: req.body.ingredients,
-        allergens: req.body.allergens,
+        diet: req.body.diet,
         userName: req.body.userName
         }
 
@@ -301,11 +301,12 @@ app.post('/addmeal', upload.single('image'), function(req, res){
         
             if (err) throw err;
 
-             console.log(req.body.title + " has been added to the Database");
+            console.log(req.body.title + " has been added to the Database");
 
              res.send(JSON.stringify({
                  success: true,
-                 msg: "Meal added to the Database"
+                 msg: "Meal added to the Database",
+                 mealId: result._id
              }))
 
              //disconnect from database
@@ -313,9 +314,48 @@ app.post('/addmeal', upload.single('image'), function(req, res){
         })
     })
 })
- app.get('/getmealdescription', function(req, res){
+// to display information about an individual meal
+ app.post('/getmealdescription', function(req, res){
 
+    let parsed = JSON.parse(req);
+    
+    //connect to the db
+    MongoClient.connect(url, function(err, result){
+
+        if (err) throw err;
+
+        let db = client.db(dbName);
+
+        //Search 'meals' collection in db for matching mealId
+        db.collection('meals').findOne({mealId = parsed.mealId}, function(err, result){
+
+            if (err) throw err;
+
+            if (!result)
+            {
+                res.send(JSON.stringify({
+                    success: false
+                }))
+            }
+            else
+            {
+                res.send(JSON.stringify({
+                    success: true,
+                    title: result.title,
+                    description: result.description,
+                    price: result.price,
+                    ingredients: result.ingredients,
+                    diet: result.diet,
+                    image: result.image,
+                    userName: result.userName,
+                    mealId: result._Id
+                }))
+            }
+            client.close()
+        }
+    )
  } )
+})
  /******************
   * Server listen
   ******************/
