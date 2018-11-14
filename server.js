@@ -281,6 +281,7 @@ app.post('/addmeal', upload.single('image'), function(req, res){
   
     //splitting the string of dietary restrictions into an array
     let dietObject = req.body.diet.split(',');
+    console.log(dietObject)
     let ingredientObject = req.body.ingredients.split(',');
     
     let meal ={
