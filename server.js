@@ -6,7 +6,8 @@ let app = express();
 let bodyParser=require('body-parser');
 let cookieParser = require('cookie-parser');
 let multer = require('multer');
-const MongoClient = require('mongodb').MongoClient;
+const MongoDb = require('mongodb');
+const MongoClient = MongoDb.MongoClient;
 
 // Our database info
 const url = "mongodb://admin:password1@ds159993.mlab.com:59993/meals-db" ;
@@ -322,12 +323,12 @@ app.post('/addmeal', upload.single('image'), function(req, res){
 // to display information about an individual meal
  app.post('/getmealdescription', function(req, res){
 
-    let parsed = JSON.parse(req);
+    let parsed = JSON.parse(req.body);
     
-    var obj_id = BSON.ObjectID.createFromHexString(parsed._id)
+    var obj_id = MongoDb.ObjectID.createFromHexString(parsed._id)
 
     //connect to the db
-    MongoClient.connect(url, function(err, result){
+    MongoClient.connect(url, function(err, client){
 
         if (err) throw err;
 
@@ -351,8 +352,8 @@ app.post('/addmeal', upload.single('image'), function(req, res){
                     title: result.title,
                     description: result.description,
                     price: result.price,
-                    ingredients: result.ingredientsObject,
-                    diet: result.dietObject,
+                    ingredients: result.ingredients,
+                    diet: result.diet,
                     image: result.image,
                     userName: result.userName,
                     _id: result._id
