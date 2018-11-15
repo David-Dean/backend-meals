@@ -372,7 +372,8 @@ app.get('/getallmeals', function(req, res){
         if (err) throw err;
 
         let db = client.db(dbName);
-
+        
+        //return all items in the collection
         db.collection('meals').find({}).toArray(function(err, result){
 
             if (err) throw err;
@@ -385,6 +386,39 @@ app.get('/getallmeals', function(req, res){
         })})
     })
 
+ // to get infomation for Chef Profile   
+app.post('/getprofile', function(req, res){
+
+    let parsed = JSON.parse(req.body)
+
+    MongoClient.connect(url, function(err, client){
+
+        if (err) throw err;
+
+        let db = client.db(dbName);
+
+        // searching 'users' db to filter and return matching userName info 
+        db.collection('users').findOne({userName: parsed.userName }, function(err, result){
+
+            if (err) throw err;
+
+            if (!result)
+            {
+                res.send(JSON.stringify({
+                    success: false
+                }))
+            }
+
+            else
+            {
+                res.send(
+                    JSON.stringify(result)
+                )
+            }
+            client.close()
+        })
+    })
+})
  /******************
   * Server listen
   ******************/
