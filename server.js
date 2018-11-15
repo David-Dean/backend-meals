@@ -420,6 +420,29 @@ app.post('/getprofile', function(req, res){
         })
     })
 })
+//to get all the meals offered by a selected chef
+app.post('/getitemsbychef', function(req, res){
+
+    let parsed = JSON.parse(req.body)
+
+    MongoClient.connect(url, function(err, client){
+
+        if (err) throw err;
+
+        let db = client.db(dbName);
+        
+        //find meals matching chef's username from  collection, return as array
+        db.collection('meals').find({userName: parsed.userName}).toArray(function(err, result){
+
+            if (err) throw err;
+
+            else
+            {
+                res.send(JSON.stringify(result))
+            }
+            client.close()
+        })})
+    })
  /******************
   * Server listen
   ******************/
