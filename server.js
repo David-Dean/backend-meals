@@ -363,6 +363,28 @@ app.post('/addmeal', upload.single('image'), function(req, res){
     )
  } )
 })
+
+//To display all meals on Browse Page
+app.get('/getallmeals', function(req, res){
+
+    MongoClient.connect(url, function(err, client){
+
+        if (err) throw err;
+
+        let db = client.db(dbName);
+
+        db.collection('meals').find({}).toArray(function(err, result){
+
+            if (err) throw err;
+
+            else
+            {
+                res.send(JSON.stringify(result))
+            }
+            client.close()
+        })})
+    })
+
  /******************
   * Server listen
   ******************/
