@@ -387,6 +387,31 @@ app.get('/getallmeals', function(req, res){
         })})
     })
 
+ app.post('/searchmeals', function(req, res){
+
+    let parsed = JSON.parse(req.body)
+    console.log(parsed)
+        MongoClient.connect(url, function(err, client){
+    
+            if (err) throw err;
+    
+            let db = client.db(dbName);
+
+            let regex = new RegExp (parsed.query, "i")
+            
+            //return all items in the collection
+            db.collection('meals').find({$or: [{title: regex} , {userName:regex}]}).toArray(function(err, result){
+    
+                if (err) throw err;
+    
+                else
+                {
+                    res.send(JSON.stringify(result))
+                }
+                client.close()
+            })})
+        })
+    
  // to get infomation for Chef Profile   
 app.post('/getprofile', function(req, res){
 
