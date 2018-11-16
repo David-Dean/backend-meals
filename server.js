@@ -45,7 +45,7 @@ app.post('/signup', function (req, res) {
     let parsed = JSON.parse(req.body);
 
     // Connect to the db
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -113,7 +113,7 @@ app.post('/login', function (req, res) {
     let parsed = JSON.parse(req.body);
 
     // Connect to the db
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -207,7 +207,7 @@ app.get('/login', function (req, res) {
     }
 
     // Check in the db that the session id exists in our 'users' collection
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -268,7 +268,7 @@ app.post('/setprofile', upload.single('file'), function (req, res) {
     }
 
     // Connect to the db
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -323,7 +323,7 @@ app.post('/addmeal', upload.single('image'), function (req, res) {
     }
 
     //connect to the database
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -355,7 +355,7 @@ app.post('/getmealdescription', function (req, res) {
     var obj_id = MongoDb.ObjectID.createFromHexString(parsed._id)
 
     //connect to the db
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -393,7 +393,7 @@ app.post('/getmealdescription', function (req, res) {
 //To display all meals on Browse Page
 app.get('/getallmeals', function (req, res) {
 
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -416,7 +416,7 @@ app.post('/searchmeals', function (req, res) {
 
     let parsed = JSON.parse(req.body)
     console.log(parsed)
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -448,7 +448,7 @@ app.post('/getprofile', function (req, res) {
 
     let parsed = JSON.parse(req.body)
 
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -479,7 +479,7 @@ app.post('/getitemsbychef', function (req, res) {
 
     let parsed = JSON.parse(req.body)
 
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -504,7 +504,7 @@ app.post('/placerequest', function (req, res) {
 
     let parsed = JSON.parse(req.body);
 
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -535,7 +535,7 @@ app.post('/getrequests', function (req, res) {
 
     let parsed = JSON.parse(req.body);
 
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
 
@@ -598,7 +598,7 @@ app.post('/getrequests', function (req, res) {
 app.post('/updaterequeststatus', function(req, res){
     let parsed = JSON.parse(req.body);
 
-    MongoClient.connect(url, function(err, client){
+    MongoClient.connect(url, {useNewUrlParser: true}, function(err, client){
 
         if (err) throw err;
 
