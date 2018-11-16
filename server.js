@@ -264,7 +264,7 @@ app.post('/setprofile', upload.single('file'), function (req, res) {
     // create the object with values to update the user document
     let updateObj = {
         bio: req.body.bio,
-        profilePicturePath: 'pictures/' + req.file.filename
+        profilePicturePath: '/pictures/' + req.file.filename
     }
 
     // Connect to the db
