@@ -315,7 +315,7 @@ app.post('/addmeal', upload.single('image'), function (req, res) {
         title: req.body.title,
         description: req.body.description,
         price: req.body.price,
-        image: 'pictures/' + req.file.filename,
+        image: '/pictures/' + req.file.filename,
         ingredients: ingredientObject,
         diet: dietObject,
         userName: req.body.userName,
