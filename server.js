@@ -560,9 +560,9 @@ app.post('/getrequests', function (req, res) {
                 }
             })
         }
-        if (parsed.userType === "host") {
+        if (parsed.userType === "chef") {
             db.collection('requests').find({
-                chefName: parsed.chefName
+                chefName: parsed.userName
             }).toArray(function (err, result) {
 
                 if (err) throw err;
