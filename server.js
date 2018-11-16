@@ -14,7 +14,7 @@ const url = "mongodb://admin:password1@ds159993.mlab.com:59993/meals-db" ;
 const dbName = 'meals-db';
 
 // Our server Port
-const PORT = 4000;
+const PORT = 4002;
 
 // Configure the express app with needed middleware
 app.use(bodyParser.raw({type: ['application/*', 'text/*']}));// avoid parsing 'multipart/mixed' content types, let multer deal with that
