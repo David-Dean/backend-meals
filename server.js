@@ -318,7 +318,8 @@ app.post('/addmeal', upload.single('image'), function (req, res) {
         image: 'pictures/' + req.file.filename,
         ingredients: ingredientObject,
         diet: dietObject,
-        userName: req.body.userName
+        userName: req.body.userName,
+        coordinates: req.body.coordinates
     }
 
     //connect to the database
