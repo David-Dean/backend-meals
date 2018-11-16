@@ -542,38 +542,55 @@ app.post('/getrequests', function (req, res) {
 
         //two cases; 
         //if user is a client, match for userName
-        //if user is a host, match for chefName
+        //if user is a chef, match for chefName
         if (parsed.userType === 'client') {
-            db.collection('requests').find({
-                userName: parsed.userName
-            }).toArray(function (err, result) {
+
+            db.collection('requests').find({userName: parsed.userName}).toArray(function (err, result) {
 
                 if (err) throw err;
 
-                else {
+                if(result)
+                {
                     res.send(JSON.stringify({
                         success: true,
                         result: result
                     }))
-                    client.close()
-
+                }
+                else
+                {
+                    res.send(JSON.stringify({
+                        success: false,
+                        msg: 'No requests found.'
+                    }))
                 }
             })
         }
+        
         if (parsed.userType === "chef") {
-            db.collection('requests').find({
-                chefName: parsed.userName
-            }).toArray(function (err, result) {
+
+            db.collection('requests').find({chefName: parsed.userName}).toArray(function (err, result) {
 
                 if (err) throw err;
 
-                else {
-                    res.send(JSON.stringify(result))
+                if (result)
+                {
+                    res.send(JSON.stringify({
+                        success: true,
+                        result: result
+                    }))
                 }
-                client.close()
-
+                else
+                {
+                    res.send(JSON.stringify({
+                        success: false,
+                        msg: 'No request found.'
+                    }))
+                }
             })
         }
+
+        // All done, bye
+        client.close();
     })
 })
 
