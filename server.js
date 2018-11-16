@@ -513,7 +513,7 @@ app.post('/placerequest', function (req, res) {
 
             if (err) throw err;
 
-            console.log(parsed.title + " has been added to the requests Database");
+            console.log(result._id + " has been added to the requests collection");
 
             res.send(JSON.stringify({
                 success: true,
@@ -577,7 +577,49 @@ app.post('/getrequests', function (req, res) {
     })
 })
 
+app.post('/updaterequeststatus', function(req, res){
+    let parsed = JSON.parse(req.body);
 
+    MongoClient.connect(url, function(err, client){
+
+        if (err) throw err;
+
+        let db = client.db(dbName);
+        let searchId = MongoDb.ObjectId.createFromHexString(parsed._id);
+
+        // Update the document's status field
+        db.collection('requests').updateOne({_id: searchId}, {$set:{status: parsed.status}}, function(err, result){
+
+            if (err) throw err;
+
+            // Did we manage to update a document at all?
+            if(result.modifiedCount !== 1)
+            {
+                res.send(JSON.stringify({
+                    success: false,
+                    msg: 'No requests were updated, document probably not found...'
+                }))
+            }
+            else
+            {
+                // Ok, so the request was updated, let's grab all of the collection and
+                // send it back to the frontend
+                db.collection('requests').find({}).toArray(function(err, result){
+
+                    if (err) throw err;
+
+                    res.send(JSON.stringify({
+                        success: true,
+                        result: result
+                    }))
+                })
+            }
+
+            // All done, bye
+            client.close();
+        })
+    })
+})
 
 
 /******************
