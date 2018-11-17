@@ -1,6 +1,7 @@
 let sha256 = require("sha256");
 let uuid = require('uuid/v1');
 let fs = require('fs');
+let geolib = require('geolib');
 let express = require('express');
 let app = express();
 let bodyParser = require('body-parser');
@@ -95,7 +96,8 @@ app.post('/signup', function (req, res) {
 
                     res.send(JSON.stringify({
                         success: true,
-                        userType: parsed.userType
+                        userType: parsed.userType,
+                        userCoordinates: parsed.coordinates
                     }))
 
                     // All done, goodbye
@@ -182,7 +184,8 @@ app.post('/login', function (req, res) {
                     // (Thing we also managed to write to the cookie for later automatic login)
                     res.send(JSON.stringify({
                         success: true,
-                        userType: result.userType
+                        userType: result.userType,
+                        userCoordinates: result.coordinates
                     }))
 
                     // All done, goodbye
@@ -229,7 +232,8 @@ app.get('/login', function (req, res) {
                 res.send(JSON.stringify({
                     success: true,
                     userType: req.cookies.userType,
-                    userName: result.userName
+                    userName: result.userName,
+                    userCoordinates: result.coordinates
                 }))
             }
 
@@ -352,7 +356,7 @@ app.post('/getmealdescription', function (req, res) {
 
     let parsed = JSON.parse(req.body);
 
-    var obj_id = MongoDb.ObjectID.createFromHexString(parsed._id)
+    var obj_id = MongoDb.ObjectID.createFromHexString(parsed._id);
 
     //connect to the db
     MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
@@ -362,9 +366,7 @@ app.post('/getmealdescription', function (req, res) {
         let db = client.db(dbName);
 
         //Search 'meals' collection in db for matching mealId
-        db.collection('meals').findOne({
-            _id: obj_id
-        }, function (err, result) {
+        db.collection('meals').findOne({ _id: obj_id }, function (err, result) {
 
             if (err) throw err;
 
@@ -373,7 +375,8 @@ app.post('/getmealdescription', function (req, res) {
                     success: false
                 }))
             } else {
-                res.send(JSON.stringify({
+                // Prepare the object we'll be sending back
+                let resObj = {
                     success: true,
                     title: result.title,
                     description: result.description,
@@ -383,7 +386,18 @@ app.post('/getmealdescription', function (req, res) {
                     image: result.image,
                     userName: result.userName,
                     _id: result._id
-                }))
+                }
+
+                // Check if we have userCoordinates passed along the request,
+                // if so, calculate the distance between that and the coordinates on the found meal
+                let userCoords = parsed.userCoordinates;
+
+                if (userCoords)
+                {
+                    resObj.distance = geolib.getDistance(userCoords, result.coordinates, 5);
+                }
+
+                res.send(JSON.stringify(resObj))
             }
             client.close()
         })
@@ -391,7 +405,9 @@ app.post('/getmealdescription', function (req, res) {
 })
 
 //To display all meals on Browse Page
-app.get('/getallmeals', function (req, res) {
+app.post('/getallmeals', function (req, res) {
+
+    let parsed = JSON.parse(req.body);
 
     MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
@@ -404,9 +420,18 @@ app.get('/getallmeals', function (req, res) {
 
             if (err) throw err;
 
-            else {
-                res.send(JSON.stringify(result))
+            // Check if we have userCoordinates in the request
+            // If so, we'll calculate the distance between those and the meals' coordinates
+            if (parsed.userCoordinates)
+            {
+                for (let i = 0; i < result.length; i++)
+                {
+                    result[i]['distance'] = geolib.getDistance(parsed.userCoordinates, result[i].coordinates, 5);
+                }
             }
+            
+            res.send(JSON.stringify(result))
+            
             client.close()
         })
     })
@@ -415,7 +440,7 @@ app.get('/getallmeals', function (req, res) {
 app.post('/searchmeals', function (req, res) {
 
     let parsed = JSON.parse(req.body)
-    console.log(parsed)
+    
     MongoClient.connect(url, {useNewUrlParser: true}, function (err, client) {
 
         if (err) throw err;
@@ -435,9 +460,18 @@ app.post('/searchmeals', function (req, res) {
 
             if (err) throw err;
 
-            else {
-                res.send(JSON.stringify(result))
+            // Check if we have userCoordinates in the request
+            // If so, we'll calculate the distance between those and the meals' coordinates
+            if (parsed.userCoordinates)
+            {
+                for (let i = 0; i < result.length; i++)
+                {
+                    result[i]['distance'] = geolib.getDistance(parsed.userCoordinates, result[i].coordinates, 5);
+                }
             }
+            
+            res.send(JSON.stringify(result))
+            
             client.close()
         })
     })
@@ -486,15 +520,22 @@ app.post('/getitemsbychef', function (req, res) {
         let db = client.db(dbName);
 
         //find meals matching chef's username from  collection, return as array
-        db.collection('meals').find({
-            userName: parsed.userName
-        }).toArray(function (err, result) {
+        db.collection('meals').find({userName: parsed.userName}).toArray(function (err, result) {
 
             if (err) throw err;
 
-            else {
-                res.send(JSON.stringify(result))
+            // Check if we have userCoordinates in the request
+            // If so, we'll calculate the distance between those and the meals' coordinates
+            if (parsed.userCoordinates)
+            {
+                for (let i = 0; i < result.length; i++)
+                {
+                    result[i]['distance'] = geolib.getDistance(parsed.userCoordinates, result[i].coordinates, 5);
+                }
             }
+            
+            res.send(JSON.stringify(result))
+            
             client.close()
         })
     })
