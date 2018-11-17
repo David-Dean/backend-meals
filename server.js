@@ -319,7 +319,7 @@ app.post('/addmeal', upload.single('image'), function (req, res) {
         ingredients: ingredientObject,
         diet: dietObject,
         userName: req.body.userName,
-        coordinates: req.body.coordinates
+        coordinates: JSON.parse(req.body.coordinates)
     }
 
     //connect to the database
