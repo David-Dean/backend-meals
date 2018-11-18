@@ -436,7 +436,23 @@ app.post('/getallmeals', function (req, res) {
         })
     })
 })
+app.get('/getallchefs', function(req, res){
 
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client){
+        if (err) throw err;
+        let db = client.db(dbName);
+        db.collection('users').find({userType:'chef'}).toArray(function (err, result) {
+
+            if (err) throw err;
+
+            else
+            {
+                res.send(JSON.stringify(result))
+            }
+            client.close()
+    })
+})
+})
 app.post('/searchmeals', function (req, res) {
 
     let parsed = JSON.parse(req.body)
@@ -686,4 +702,4 @@ app.post('/updaterequeststatus', function(req, res){
  ******************/
 app.listen(PORT, function () {
     console.log('Server listening on port ' + PORT)
-});
+})
