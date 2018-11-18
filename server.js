@@ -571,8 +571,6 @@ app.post('/placerequest', function (req, res) {
 
             if (err) throw err;
 
-            console.log(result._id + " has been added to the requests collection");
-
             res.send(JSON.stringify({
                 success: true,
                 msg: "request added to the Database",
@@ -696,7 +694,88 @@ app.post('/updaterequeststatus', function(req, res){
     })
 })
 
+app.post('/deleterequest', function(req, res){
 
+    let parsed = JSON.parse(req.body);
+
+    MongoClient.connect(url, {useNewUrlParser: true}, function(err, client){
+
+        if (err) throw err;
+
+        let db = client.db(dbName);
+
+        let docId = MongoDb.ObjectId.createFromHexString(parsed._id);
+
+        db.collection('requests').deleteOne({_id: docId}, function(err, result){
+
+            if (err) throw err;
+
+            if (result.deletedCount !== 1)
+            {
+                // inform of the situation
+                res.send(JSON.stringify({
+                    success: false,
+                    msg: 'No request was deleted'
+                }))
+            }
+            else
+            {
+                // We need to send back the whole collection of requests
+                //two cases; 
+                //if user is a client, match for userName
+                //if user is a chef, match for chefName
+                if (parsed.userType === 'client') {
+
+                    db.collection('requests').find({userName: parsed.userName}).toArray(function (err, result) {
+
+                        if (err) throw err;
+
+                        if(result)
+                        {
+                            res.send(JSON.stringify({
+                                success: true,
+                                result: result
+                            }))
+                        }
+                        else
+                        {
+                            res.send(JSON.stringify({
+                                success: false,
+                                msg: 'No requests found.'
+                            }))
+                        }
+                    })
+                }
+                
+                if (parsed.userType === "chef") {
+
+                    db.collection('requests').find({chefName: parsed.userName}).toArray(function (err, result) {
+
+                        if (err) throw err;
+
+                        if (result)
+                        {
+                            res.send(JSON.stringify({
+                                success: true,
+                                result: result
+                            }))
+                        }
+                        else
+                        {
+                            res.send(JSON.stringify({
+                                success: false,
+                                msg: 'No request found.'
+                            }))
+                        }
+                    })
+                }
+            }
+
+            // All done
+            client.close();
+        })
+    })
+})
 /******************
  * Server listen
  ******************/
