@@ -439,14 +439,46 @@ app.post('/getallmeals', function (req, res) {
 app.get('/getallchefs', function(req, res){
 
     MongoClient.connect(url, {useNewUrlParser: true}, function (err, client){
+
         if (err) throw err;
+
         let db = client.db(dbName);
+
         db.collection('users').find({userType:'chef'}).toArray(function (err, result) {
 
             if (err) throw err;
 
             else
             {
+                res.send(JSON.stringify(result))
+            }
+            client.close()
+    })
+})
+})
+app.post('/getallchefs', function(req, res){
+
+    let parsed = JSON.parse(req.body)
+
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client){
+
+        if (err) throw err;
+        
+        let db = client.db(dbName);
+
+        db.collection('users').find({userType:'chef'}).toArray(function (err, result) {
+
+            if (err) throw err;
+
+            else
+            {
+                if (parsed.userCoordinates)
+            {
+                for (let i = 0; i < result.length; i++)
+                {
+                    result[i]['distance'] = geolib.getDistance(parsed.userCoordinates, result[i].coordinates, 5);
+                }
+            }
                 res.send(JSON.stringify(result))
             }
             client.close()
