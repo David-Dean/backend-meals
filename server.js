@@ -351,6 +351,36 @@ app.post('/addmeal', upload.single('image'), function (req, res) {
         })
     })
 })
+
+app.post('/removemeal', function (req, res){
+
+    let parsed = JSON.parse(req.body)
+
+    var obj_id = MongoDb.ObjectID.createFromHexString(parsed._id);
+
+
+    MongoClient.connect(url, {useNewUrlParser: true}, function(err, client){
+
+        if (err) throw err;
+
+        let db = client.db(dbName);
+
+        console.log(parsed)
+        console.log(parsed._id)
+
+        db.collection('meals').deleteOne({_id : obj_id}, function (err, result){
+            if (err) throw err;
+
+            console.log('meal item removed from database')
+
+            res.send(JSON.stringify({
+                success: true
+            }))
+
+           
+        })
+    })
+})
 // to display information about an individual meal
 app.post('/getmealdescription', function (req, res) {
 
@@ -709,36 +739,20 @@ app.post('/updaterequeststatus', function(req, res){
             
                 // Ok, so the request was updated, let's grab all of the collection and
                 // send it back to the frontend
-                if (parsed.userType === 'client') {
-
-                    db.collection('requests').find({userName: parsed.userName}).toArray(function (err, result) {
-        
-                        if (err) throw err;
-        
-                        if(result)
-                        {
-                            res.send(JSON.stringify({
-                                success: true,
-                                result: result
-                            }))
-                        }
-                        else
-                        {
-                            res.send(JSON.stringify({
-                                success: false,
-                                msg: 'No requests found.'
-                            }))
-                        }
-                    })
-                }
                 
-                if (parsed.userType === "chef") {
-        
-                    db.collection('requests').find({chefName: parsed.userName}).toArray(function (err, result) {
-        
-                        if (err) throw err;
-        
-                        if (result)
+                let query=undefined
+                if(parsed.userType==='chef'){
+                    query={chefName:parsed.userName}
+                }
+                if (parsed.userType==="client"){
+                    query={userName:parsed.userName}
+                }
+                db.collection('requests').find(query).toArray(function(err, result){
+
+                    if (err) throw err;
+
+                    
+                    if (result)
                         {
                             res.send(JSON.stringify({
                                 success: true,
@@ -752,16 +766,19 @@ app.post('/updaterequeststatus', function(req, res){
                                 success: false,
                                 msg: 'No request found.'
                             }))
+                            // All done, bye
                             client.close();
                         }
                     })
-                }
-            
-
-            // All done, bye
+                })
+            })
         })
-    })
-})
+
+            
+       
+    
+
+
 
 app.post('/deleterequest', function(req, res){
 
