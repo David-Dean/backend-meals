@@ -706,23 +706,59 @@ app.post('/updaterequeststatus', function(req, res){
                     msg: 'No requests were updated, document probably not found...'
                 }))
             }
-            else
-            {
+            
                 // Ok, so the request was updated, let's grab all of the collection and
                 // send it back to the frontend
-                db.collection('requests').find({}).toArray(function(err, result){
+                if (parsed.userType === 'client') {
 
-                    if (err) throw err;
-
-                    res.send(JSON.stringify({
-                        success: true,
-                        result: result
-                    }))
-                })
-            }
+                    db.collection('requests').find({userName: parsed.userName}).toArray(function (err, result) {
+        
+                        if (err) throw err;
+        
+                        if(result)
+                        {
+                            res.send(JSON.stringify({
+                                success: true,
+                                result: result
+                            }))
+                        }
+                        else
+                        {
+                            res.send(JSON.stringify({
+                                success: false,
+                                msg: 'No requests found.'
+                            }))
+                        }
+                    })
+                }
+                
+                if (parsed.userType === "chef") {
+        
+                    db.collection('requests').find({chefName: parsed.userName}).toArray(function (err, result) {
+        
+                        if (err) throw err;
+        
+                        if (result)
+                        {
+                            res.send(JSON.stringify({
+                                success: true,
+                                result: result
+                            }))
+                            client.close();
+                        }
+                        else
+                        {
+                            res.send(JSON.stringify({
+                                success: false,
+                                msg: 'No request found.'
+                            }))
+                            client.close();
+                        }
+                    })
+                }
+            
 
             // All done, bye
-            client.close();
         })
     })
 })
