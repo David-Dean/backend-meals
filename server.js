@@ -356,8 +356,6 @@ app.post('/removemeal', function (req, res){
 
     let parsed = JSON.parse(req.body)
 
-    var obj_id = MongoDb.ObjectID.createFromHexString(parsed._id);
-
 
     MongoClient.connect(url, {useNewUrlParser: true}, function(err, client){
 
@@ -365,19 +363,31 @@ app.post('/removemeal', function (req, res){
 
         let db = client.db(dbName);
 
+        let obj_id = MongoDb.ObjectID.createFromHexString(parsed._id);
+
         console.log(parsed)
         console.log(parsed._id)
 
         db.collection('meals').deleteOne({_id : obj_id}, function (err, result){
             if (err) throw err;
 
+            if (result.deletedCount !== 1)
+            {
+                // inform of the situation
+                res.send(JSON.stringify({
+                    success: false,
+                    msg: 'No request was deleted'
+                }))
+            }
+            else
+            {
             console.log('meal item removed from database')
 
             res.send(JSON.stringify({
                 success: true
             }))
 
-           
+            }
         })
     })
 })
