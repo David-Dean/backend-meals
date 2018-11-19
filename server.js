@@ -684,6 +684,7 @@ app.post('/getrequests', function (req, res) {
 
 app.post('/updaterequeststatus', function(req, res){
     let parsed = JSON.parse(req.body);
+    console.log(parsed)
 
     MongoClient.connect(url, {useNewUrlParser: true}, function(err, client){
 
@@ -693,7 +694,7 @@ app.post('/updaterequeststatus', function(req, res){
         let searchId = MongoDb.ObjectId.createFromHexString(parsed._id);
 
         // Update the document's status field
-        db.collection('requests').updateOne({_id: searchId}, {$set:{status: parsed.status}}, function(err, result){
+        db.collection('requests').updateOne({_id: searchId}, {$set:{requestStatus: parsed.status}}, function(err, result){
 
             if (err) throw err;
 
