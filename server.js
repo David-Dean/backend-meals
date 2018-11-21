@@ -263,6 +263,7 @@ app.get('/logout', function (req, res) {
 /*********************
  * Profile endpoints
  *********************/
+//adding a Profile Picture and Bio to user or chef account
 app.post('/setprofile', upload.single('file'), function (req, res) {
 
     // create the object with values to update the user document
@@ -352,6 +353,7 @@ app.post('/addmeal', upload.single('image'), function (req, res) {
     })
 })
 
+//removing a meal from chefDashboard
 app.post('/removemeal', function (req, res){
 
     let parsed = JSON.parse(req.body)
@@ -476,6 +478,31 @@ app.post('/getallmeals', function (req, res) {
         })
     })
 })
+app.get('/getchef/:id', function (req, res) {
+
+    let id = req.params.id
+
+    MongoClient.connect(url, {useNewUrlParser: true}, function (err, client){
+
+        if (err) throw err;
+
+        let db = client.db(dbName);
+
+        let query = {userName : id }
+
+        db.collection('users').findOne(query, function (err, result){
+            
+            if (err) throw err;
+
+            res.send(JSON.stringify(result));
+
+            client.close();
+         });
+     }
+  );
+});
+
+
 app.get('/getallchefs', function(req, res){
 
     MongoClient.connect(url, {useNewUrlParser: true}, function (err, client){
@@ -722,6 +749,7 @@ app.post('/getrequests', function (req, res) {
     })
 })
 
+//change the status of a request (0-1-2-3-4-5)
 app.post('/updaterequeststatus', function(req, res){
     let parsed = JSON.parse(req.body);
     console.log(parsed)
@@ -784,12 +812,8 @@ app.post('/updaterequeststatus', function(req, res){
             })
         })
 
-            
-       
     
-
-
-
+//to delete a request from ClientDashboard
 app.post('/deleterequest', function(req, res){
 
     let parsed = JSON.parse(req.body);
